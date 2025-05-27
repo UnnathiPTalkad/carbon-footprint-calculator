@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Footprint Calculator</title>
+    <style>
+:root {
+    --primary-color: #6200EA;      /* Deep purple */
+    --primary-dark: #3700B3;       /* Darker purple */
+    --primary-light: #BB86FC;      /* Light purple */
+    --accent-color: #03DAC6;       /* Teal */
+    --accent-dark: #018786;        /* Darker teal */
+    --warn-color: #CF6679;         /* Pinkish red */
+    --neutral-color: #B0BEC5;      /* Blue-gray */
+    --bg-color: #121212;           /* Dark background */
+    --bg-card: #1F1F1F;            /* Slightly lighter dark */
+    --text-color: #FFFFFF;         /* White text */
+    --text-secondary: #B0BEC5;     /* Secondary text */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    color: var(--primary-light);
+    margin-bottom: 10px;
+}
+
+header p {
+    color: var(--text-secondary);
+}
+
+.card {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    padding: 25px;
+    margin-bottom: 30px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.question {
+    margin-bottom: 20px;
+}
+
+.question h3 {
+    margin-bottom: 15px;
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s;
+    border: 1px solid #333333;
+}
+
+label:hover {
+    background-color: rgba(187, 134, 252, 0.12);
+    border-color: var(--primary-light);
+}
+
+input[type="radio"], input[type="checkbox"] {
+    margin-right: 10px;
+    cursor: pointer;
+    accent-color: var(--primary-light);
+}
+
+input[type="range"] {
+    width: 100%;
+    margin: 15px 0;
+    height: 6px;
+    background: #333333;
+    border-radius: 5px;
+    appearance: none;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--accent-dark);
+}
+
+.range-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    color: var(--neutral-color);
+}
+
+.range-labels span {
+    font-size: 0.85em;
+}
+
+.slider-value {
+    text-align: center;
+    font-weight: bold;
+    margin: 10px 0;
+    color: var(--accent-color);
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: block;
+    margin: 30px auto 15px;
+    box-shadow: 0 4px 12px rgba(98, 0, 234, 0.3);
+}
+
+button:hover {
+    background-color: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(98, 0, 234, 0.4);
+}
+
+#result {
+    display: none;
+    text-align: center;
+    padding: 30px;
+}
+
+#result.show {
+    display: block;
+    animation: fadeIn 0.7s;
+}
+
+#footprint-level {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+#footprint-message {
+    font-size: 18px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.level {
+    padding: 6px 18px;
+    border-radius: 50px;
+    color: white;
+    display: inline-block;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 16px;
+}
+
+.level.low {
+    background: linear-gradient(135deg, #36D1DC, #5B86E5);
+}
+
+.level.medium {
+    background: linear-gradient(135deg, #FF8008, #FFC837);
+}
+
+.level.high {
+    background: linear-gradient(135deg, #ED213A, #93291E);
+}
+
+.tip {
+    background-color: rgba(3, 218, 198, 0.1);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 25px;
+    border: 1px solid var(--accent-color);
+}
+
+.tip h4 {
+    margin-bottom: 15px;
+    color: var(--accent-color);
+    font-size: 18px;
+}
+
+.tip ul li {
+    margin-bottom: 10px;
+    list-style-type: none;
+    position: relative;
+    padding-left: 20px;
+}
+
+.tip ul li:before {
+    content: "•";
+    color: var(--primary-light);
+    font-size: 20px;
+    position: absolute;
+    left: 0;
+    top: -3px;
+}
+
+.progress-container {
+    width: 100%;
+    background-color: #333333;
+    border-radius: 50px;
+    margin: 25px 0;
+    overflow: hidden;
+    padding: 3px;
+}
+
+.progress-bar {
+    height: 30px;
+    border-radius: 50px;
+    transition: width 1s ease, background-color 1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    background-image: linear-gradient(to right, #36D1DC, #5B86E5);
+    box-shadow: 0 2px 10px rgba(54, 209, 220, 0.3);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .card {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    .question h3 {
+        font-size: 1.1rem;
+    }
+    
+    button {
+        width: 100%;
+    }
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Carbon Footprint Calculator</h1>
+            <p>Discover your impact on the environment and learn how to reduce it</p>
+        </header>
+
+        <div class="card" id="calculator">
+            <div class="question">
+                <h3>1. Are you vegetarian or vegan?</h3>
+                <div class="options">
+                    <label>
+                        <input type="radio" name="diet" value="vegan"> I'm vegan (plant-based only)
+                    </label>
+                    <label>
+                        <input type="radio" name="diet" value="vegetarian"> I'm vegetarian (no meat, but consume dairy/eggs)
+                    </label>
+                    <label>
+                        <input type="radio" name="diet" value="flexitarian"> I'm flexitarian (occasional meat)
+                    </label>
+                    <label>
+                        <input type="radio" name="diet" value="meat-eater"> I regularly eat meat
+                    </label>
+                </div>
+            </div>
+
+            <div class="question">
+                <h3>2. How much fuel (petrol/diesel) do you use monthly?</h3>
+                <input type="range" id="fuel-slider" min="0" max="200" value="50" step="5">
+                <div class="slider-value" id="fuel-value">50 liters per month</div>
+                <div class="range-labels">
+                    <span>0 L</span>
+                    <span>50 L</span>
+                    <span>100 L</span>
+                    <span>150 L</span>
+                    <span>200+ L</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <h3>3. Which eco-friendly habits do you practice?</h3>
+                <div class="options">
+                    <label>
+                        <input type="checkbox" name="eco-habits" value="recycle"> I regularly recycle
+                    </label>
+                    <label>
+                        <input type="checkbox" name="eco-habits" value="energy"> I use energy-efficient appliances
+                    </label>
+                    <label>
+                        <input type="checkbox" name="eco-habits" value="water"> I conserve water
+                    </label>
+                    <label>
+                        <input type="checkbox" name="eco-habits" value="public-transport"> I use public transport or carpool
+                    </label>
+                    <label>
+                        <input type="checkbox" name="eco-habits" value="reusable"> I use reusable bags/bottles
+                    </label>
+                </div>
+            </div>
+
+            <div class="question">
+                <h3>4. Monthly electricity usage?</h3>
+                <input type="range" id="electricity-slider" min="0" max="500" value="150" step="10">
+                <div class="slider-value" id="electricity-value">150 kWh per month</div>
+                <div class="range-labels">
+                    <span>0 kWh</span>
+                    <span>250 kWh</span>
+                    <span>500+ kWh</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <h3>5. How would you describe your consumption habits?</h3>
+                <div class="options">
+                    <label>
+                        <input type="radio" name="consumption" value="minimal"> Minimal - I only buy what I absolutely need
+                    </label>
+                    <label>
+                        <input type="radio" name="consumption" value="conscious"> Conscious - I think carefully before purchasing
+                    </label>
+                    <label>
+                        <input type="radio" name="consumption" value="average"> Average - I shop regularly for things I want
+                    </label>
+                    <label>
+                        <input type="radio" name="consumption" value="high"> High - I frequently buy new products
+                    </label>
+                </div>
+            </div>
+
+            <button id="calculate-btn">Calculate My Footprint</button>
+        </div>
+
+        <div class="card" id="result">
+            <h2>Your Carbon Footprint Result</h2>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="footprint-bar"></div>
+            </div>
+
+            <p id="footprint-level">You have a <span class="level" id="level-indicator">Medium</span> carbon footprint</p>
+            
+            <p id="footprint-message">Based on your lifestyle choices, you're making some positive impacts but there's room for improvement.</p>
+            
+            <div class="tip" id="tips-container">
+                <h4>Tips to Reduce Your Carbon Footprint</h4>
+                <ul id="tips-list">
+                    <!-- Tips will be inserted here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const fuelSlider = document.getElementById('fuel-slider');
+        const fuelValue = document.getElementById('fuel-value');
+        const electricitySlider = document.getElementById('electricity-slider');
+        const electricityValue = document.getElementById('electricity-value');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const resultCard = document.getElementById('result');
+        const levelIndicator = document.getElementById('level-indicator');
+        const footprintMessage = document.getElementById('footprint-message');
+        const footprintBar = document.getElementById('footprint-bar');
+        const tipsList = document.getElementById('tips-list');
+
+        // Update slider values
+        fuelSlider.addEventListener('input', () => {
+            fuelValue.textContent = `${fuelSlider.value} liters per month`;
+        });
+
+        electricitySlider.addEventListener('input', () => {
+            electricityValue.textContent = `${electricitySlider.value} kWh per month`;
+        });
+
+        // Calculate carbon footprint
+        calculateBtn.addEventListener('click', () => {
+            // Check if all required fields are filled
+            const dietSelection = document.querySelector('input[name="diet"]:checked');
+            const consumptionSelection = document.querySelector('input[name="consumption"]:checked');
+            
+            if (!dietSelection || !consumptionSelection) {
+                alert('Please answer all required questions!');
+                return;
+            }
+
+            // Get values
+            const diet = dietSelection.value;
+            const fuelUsage = parseInt(fuelSlider.value);
+            const electricity = parseInt(electricitySlider.value);
+            const consumption = consumptionSelection.value;
+            
+            // Count eco-friendly habits
+            const ecoHabits = document.querySelectorAll('input[name="eco-habits"]:checked').length;
+            
+            // Calculate score - lower is better
+            let score = 0;
+            
+            // Diet score (0-30)
+            if (diet === 'vegan') score += 0;
+            else if (diet === 'vegetarian') score += 10;
+            else if (diet === 'flexitarian') score += 20;
+            else if (diet === 'meat-eater') score += 30;
+            
+            // Fuel usage score (0-40)
+            score += Math.min(40, fuelUsage / 5);
+            
+            // Electricity usage score (0-30)
+            score += Math.min(30, electricity / 16.67);
+            
+            // Consumption habits score (0-20)
+            if (consumption === 'minimal') score += 0;
+            else if (consumption === 'conscious') score += 7;
+            else if (consumption === 'average') score += 14;
+            else if (consumption === 'high') score += 20;
+            
+            // Eco-friendly habits reduction (-25 max)
+            score -= (ecoHabits * 5);
+            
+            // Ensure score is between 0 and 100
+            score = Math.max(0, Math.min(100, score));
+            
+            // Determine footprint level
+            let level, message, color, tips;
+            
+            if (score < 40) {
+                level = "Low";
+                color = "#4CAF50"; // Green
+                message = "Great job! You're making eco-friendly choices that help protect our planet.";
+                tips = [
+                    "Continue your fantastic eco-friendly habits",
+                    "Consider installing solar panels if possible",
+                    "Share your knowledge with friends and family",
+                    "Look into community environmental initiatives"
+                ];
+            } else if (score < 70) {
+                level = "Medium";
+                color = "#FFC107"; // Amber
+                message = "You're on the right track! A few more changes could significantly reduce your impact.";
+                tips = [
+                    "Try reducing meat consumption further",
+                    "Use public transportation more often",
+                    "Switch to energy-efficient appliances",
+                    "Consider a renewable energy provider"
+                ];
+            } else {
+                level = "High";
+                color = "#F44336"; // Red
+                message = "Oops! Try to be more eco-friendly and don't pollute our beautiful environment.";
+                tips = [
+                    "Start with meatless Mondays to reduce consumption",
+                    "Carpool or use public transport when possible",
+                    "Turn off lights and appliances when not in use",
+                    "Begin recycling paper, plastic, and glass",
+                    "Use reusable shopping bags and water bottles"
+                ];
+            }
+            
+            // Update UI
+            levelIndicator.textContent = level;
+            levelIndicator.className = `level ${level.toLowerCase()}`;
+            footprintMessage.textContent = message;
+            
+            // Update progress bar
+            footprintBar.style.width = `${score}%`;
+            footprintBar.style.backgroundColor = color;
+            footprintBar.textContent = `${Math.round(score)}%`;
+            
+            // Populate tips
+            tipsList.innerHTML = '';
+            tips.forEach(tip => {
+                const li = document.createElement('li');
+                li.textContent = tip;
+                tipsList.appendChild(li);
+            });
+            
+            // Show result
+            resultCard.classList.add('show');
+            resultCard.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
